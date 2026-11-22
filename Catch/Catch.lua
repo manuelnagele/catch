@@ -1,8 +1,8 @@
 -- Catch: fishing, stripped down. What bites here and what it's worth, the cast bar with your bite window, the live
--- panel, hotspots on the map. A Deadbeat module (spec 0.1).
+-- panel, hotspots on the map. A Deadbeat module (spec 2.0).
 local ADDON, ns = ...
 local Core = ns.Core
-local VERSION = "0.10.0"
+local VERSION = "1.0.0"
 
 local db, char, session
 local fishingNames = {}
@@ -90,35 +90,30 @@ end
 
 -- --- the bar (Deadbeat) ------------------------------------------------------------
 
-local PRIORITY = 50
+-- Catch's items (spec 2.0), only while you fish (the farm context): the take, gold per hour, your skill.
+local items = {}
 
 local function updateBar()
     if not m then return end
-    if m.Claim then m:Claim("farm", fishingNow()) end    -- Deadbeat's context: farming while you fish
+    m:Claim("farm", fishingNow())                        -- Deadbeat's context: farming while you fish
     if not fishingNow() then
-        for _, f in ipairs({ "label", "clock", "primary", "secondary" }) do m:Clear(f) end
-        if m.skillBadge then m.skillBadge:Hide() end
+        for _, it in pairs(items) do it:Hide() end
         return
     end
     local K = Deadbeat.kit
-    local _, sub = here()
     local sum = Core.fishSummary(session.log, price)
     local hourly = Core.perHour(sum.total, session.active)
-    m:Set("label", sub, PRIORITY)
-    m:Set("clock", Core.clock(session.active), PRIORITY)
-    m:Set("primary", K.coins(sum.total, 12), PRIORITY)
-    m:Set("secondary", (hourly and (K.coins(hourly, 10, true) .. "|cff" .. K.hex(K.GREEN) .. "/h|r") or ""), PRIORITY)
-    -- skill badge: your skill vs. this water's base (green = no lost casts)
+    items.take:Set(K.coins(sum.total, 11)) items.take:Show()
+    items.rate:Set(hourly and (K.coins(hourly, 10, true) .. "/h") or "…") items.rate:Show()
+    -- skill: your skill vs. this water's base (good = no lost casts here)
     local rank, _, bonus = skill()
     local _, base = water()
-    local b = m.skillBadge
     if rank then
         local total = rank + (bonus or 0)
-        local c = (base and total >= base + 95) and K.GREEN or (base and K.P.bronze4 or K.P.warmGrey)
-        b.text:SetText(("|cff%s%d|r"):format(K.hex(c), total))
-        b:Show()
+        items.skill:Set(tostring(total), (base and total >= base + 95) and "good" or "normal")
+        items.skill:Show()
     else
-        b:Hide()
+        items.skill:Hide()
     end
 end
 
@@ -183,21 +178,19 @@ local function options(module)
 end
 
 local function buildBar()
-    if not Deadbeat then return end
-    m = Deadbeat.Register("Catch", 30, { spec = "0.1" })
-    local b = m:Badge(34, { id = "catch.skill", label = "Fishing skill", contexts = { farm = true } })
-    b.icon = b:CreateTexture(nil, "ARTWORK")
-    b.icon:SetSize(12, 12)
-    b.icon:SetPoint("LEFT")
-    b.icon:SetTexture("Interface\\Icons\\Trade_Fishing")
-    b.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-    b.text = b:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    b.text:SetPoint("LEFT", b.icon, "RIGHT", 3, 0)
-    b:Hide()
-    m.skillBadge = b
-    m:Section(section)
-    if m.Options then options(m) end
+    if not (Deadbeat and Deadbeat.SPEC and Deadbeat.SPEC >= "2.0") then return end
+    local I = "Interface\\Icons\\"
+    m = Deadbeat.Register("Catch", { icon = I .. "Trade_Fishing", spec = "2.0" })
+    local farm = { farm = true }
+    items.take = m:Item("take", { name = "Take", icon = I .. "INV_Misc_Fish_02", contexts = farm })
+    items.rate = m:Item("rate", { name = "Gold per hour", icon = I .. "INV_Misc_Coin_02", contexts = farm })
+    items.skill = m:Item("skill", { name = "Fishing skill", icon = I .. "Trade_Fishing", contexts = farm })
+    for _, it in pairs(items) do it:Hide() end
+    m:Tooltip(function(tip, _, shift) section(tip, shift) end)
+    m:Click(function() if ns.Panel then ns.Panel.toggle() end end, "show or hide the fishing panel")
+    options(m)
 end
+
 
 -- --- API for Panel.lua and Map.lua -----------------------------------------------------
 

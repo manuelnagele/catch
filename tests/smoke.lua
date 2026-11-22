@@ -170,7 +170,6 @@ assert(alphaSet == 1, "UI back after moving, got " .. tostring(alphaSet))
 for _, t in ipairs(W.tickers) do t() end
 assert(table.concat((function() local t = {} for i, v in ipairs(played) do t[i] = tostring(v) end return t end)(), " "):find("ambience_lake.ogg"), "ambience started while fishing")
 CatchPanel:_script("OnEnter")
-DeadbeatBar:_script("OnEnter")
 WorldMapFrame:_script("OnShow")
 SlashCmdList.CATCH("debug")
 SlashCmdList.CATCH("map")
@@ -198,8 +197,14 @@ local char = CatchDB.chars["Player-1-ABC"]
 assert(char.session.casts == 14 and char.session.catches == 10 and #char.session.log == 10, "10 casts, 10 catches")
 assert(#char.spots == 10 and char.spots[1].pool and char.spots[1].sub == "Lakkari Tar Pits", "spots with pool + subzone")
 assert(#char.bites == 10, "bite times recorded")
-local tip = table.concat(W.tipLines, "\n")
-assert(tip:find("Fishing"), "fishing section on Deadbeat's tooltip")
+local function item(id) for _, it in ipairs(Deadbeat.Items()) do if it.key == "Catch." .. id then return it end end end
+for _, t in ipairs(W.tickers) do t() end
+assert(item("take") and item("take").wanted and item("take").value ~= "", "the take item while fishing")
+assert(item("skill") and item("skill").value == "297", "skill 272 + 25: " .. tostring(item("skill").value))
+for i = #W.tipLines, 1, -1 do W.tipLines[i] = nil end
+local tip = W.tooltip(item("take"))
+assert(tip:find("Fishing · Lakkari Tar Pits") and tip:find("What bites here"), "the take's tooltip: " .. tip)
+item("take").frame:_script("OnClick", "LeftButton")                     -- toggles the panel
 -- without a price addon: every value is the vendor price (public installs)
 ForeverMarketPrices = nil
 local cardValue

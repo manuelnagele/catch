@@ -14,8 +14,8 @@ valued, and where the fish are. A [Deadbeat](https://github.com/manuelnagele/dea
   Click it to put on your best lure.
 - **Every catch** rises above the bar as a card (icon in its quality colour, name, worth); rare and record catches
   sparkle. A **creel** under the bar counts your fish and the session's worth; quiet adventurer quotes drift by.
-- **On the bar** while you fish: the water you're at, the take, gold per hour, your fishing skill. The tooltip: what
-  bites here (chance, value, share).
+- **On the bar** while you fish (Deadbeat 2.0 items): the take, gold per hour, your fishing skill (green when no cast
+  can be lost here). Hover: the water you're at and what bites here (chance, value, share). Click: the fishing panel.
 - **Fishing panel** under the bar: catch feed, where the gold comes from, catches per minute, value over time.
 - **Map:** hotspots where you've caught (bronze → gold by value per catch, pools ringed) and the zone's waters ranked
   by expected gold per catch. Works on the world map and OpenMap.
