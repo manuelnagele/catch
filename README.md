@@ -47,7 +47,7 @@ The one-button approach follows FishMate's. Sounds and textures are Catch's own 
 
 ```
 luajit tests/run.lua     # the fishing math
-luajit tests/smoke.lua   # the whole addon on Deadbeat (needs ../deadbeat)
+luajit tests/smoke.lua   # the whole addon on Deadbeat (needs ../deadbeat and ../deadbeat-spec)
 ```
 Releases: push a tag `vX.Y.Z` matching the TOC's version; CI packages the zip onto GitHub Releases.
 `deploy/` is the author's Linux setup that keeps a game install in sync with this repo (optional).
