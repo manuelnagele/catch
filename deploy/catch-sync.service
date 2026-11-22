@@ -1,0 +1,12 @@
+[Unit]
+Description=Catch — follow origin/main, relink the addon, notify on change
+After=network-online.target
+
+[Service]
+ExecStart=@REPO@/deploy/catch-sync.sh
+Environment=CATCH_REPO=@REPO@
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=default.target
