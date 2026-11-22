@@ -1,9 +1,6 @@
--- luajit tests/smoke.lua: Catch on Deadbeat (sibling repo) against the shared WoW stub, one fishing session.
-local W = dofile("../deadbeat/tests/wowstub.lua")
-local dns = {}
-for _, f in ipairs({ "../deadbeat/Deadbeat/Kit.lua", "../deadbeat/Deadbeat/Deadbeat.lua", "../deadbeat/Deadbeat/Settings.lua" }) do assert(loadfile(f))("Deadbeat", dns) end
-W.frames[#W.frames]:_fire("ADDON_LOADED", "Deadbeat")
-W.frames[#W.frames]:_fire("PLAYER_LOGIN")
+-- luajit tests/smoke.lua: Catch on Deadbeat (sibling repo) on the shared harness (deadbeat-spec), one fishing session.
+local W = dofile(os.getenv("HARNESS") or "../deadbeat-spec/harness/wowstub.lua")   -- the shared harness
+W.loadDeadbeat(os.getenv("DEADBEAT") or "../deadbeat")
 
 -- what Catch needs beyond the shared stub
 C_Spell = { GetSpellName = function(id) return (id == 7620 or id == 131474) and "Fishing" or nil end }
